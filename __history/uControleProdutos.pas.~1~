@@ -1,0 +1,121 @@
+unit uControleProdutos;
+
+interface
+
+uses System.Classes, System.SysUtils;
+
+type
+  PointProduto = ^TProduto;
+  TProduto = record
+    Codigo: Integer;
+    Descricao: String[100];
+    ValorUnitario: Real;
+    Proximo: PointProduto;
+  end;
+
+  TEstruturaProdutos = class
+  private
+    Topo: PointProduto;
+    Nodo: PointProduto;
+    function carregarDados(aux: PointProduto): TStrings;
+  public
+    constructor Create();
+    destructor Destroy();
+
+    function IncluirProduto(Codigo: Integer; Descricao: String; ValorUnitario: Real): Boolean;
+    function RemoveProduto(): Boolean;
+    function RemoveTodosProdutos(): Boolean;
+    function CarregarProdutos: TStrings;
+
+    function PesquisaCodigo(Codigo: Integer): TStrings;
+  end;
+
+implementation
+
+{ TEstruturaProdutos }
+
+function TEstruturaProdutos.carregarDados(aux: PointProduto): TStrings;
+begin
+   Result := TStringList.Create;
+   Result.Add('Código: ' + IntToStr(aux^.Codigo) + ' Descrição: ' + aux^.Descricao);
+   Result.Add('Valor Unitário: ' + FormatFloat('###,##0.00', aux^.ValorUnitario));
+   Result.Add('------------------------------------------');
+end;
+
+function TEstruturaProdutos.CarregarProdutos: TStrings;
+var
+  Aux: PointProduto;
+Begin
+  aux := topo;
+  while aux <> nil do
+  begin
+    Result.AddStrings(carregarDados(aux));
+    aux := aux^.Proximo;
+  end;
+end;
+
+constructor TEstruturaProdutos.Create;
+begin
+  Topo := nil;
+end;
+
+destructor TEstruturaProdutos.Destroy;
+begin
+  RemoveTodosProdutos();
+end;
+
+function TEstruturaProdutos.IncluirProduto(Codigo: Integer; Descricao: String; ValorUnitario: Real): Boolean;
+begin
+  try
+    new(Nodo);
+    Nodo^.Codigo := Codigo;
+    Nodo^.Descricao := Descricao;
+    Nodo^.ValorUnitario := ValorUnitario;
+    Nodo^.Proximo := Topo;
+    Topo := Nodo;
+    Result := true;
+  except
+    Result := false;
+  end;
+end;
+
+function TEstruturaProdutos.PesquisaCodigo(Codigo: Integer): TStrings;
+var
+  Aux: PointProduto;
+Begin
+  aux := topo;
+  while aux <> nil do
+  begin
+    if aux^.Codigo = Codigo then
+    begin
+      Result.AddStrings(carregarDados(aux));
+      break;
+    end
+    else
+      aux := aux^.Proximo;
+  end;
+end;
+
+function TEstruturaProdutos.RemoveProduto: Boolean;
+var
+  aux : PointProduto;
+begin
+  aux := Topo;
+  Topo := Topo^.Proximo;
+  Dispose(Aux);
+end;
+
+function TEstruturaProdutos.RemoveTodosProdutos: Boolean;
+var
+  aux : PointProduto;
+Begin
+  aux := topo;
+  while Topo <> nil do
+  begin
+    aux := Topo;
+    Topo := Topo^.Proximo;
+    Dispose(Aux);
+  end;
+end;
+
+end.
